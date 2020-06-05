@@ -21,7 +21,7 @@ public abstract class Singleton<T> where T : class, new()
 	}
 
     /*
-     * Ã»ÓĞÈÎºÎÊµÏÖµÄº¯Êı£¬ÓÃÓÚ±£Ö¤MonoSingletonÔÚÊ¹ÓÃÇ°ÒÑ´´½¨
+     * æ²¡æœ‰ä»»ä½•å®ç°çš„å‡½æ•°ï¼Œç”¨äºä¿è¯MonoSingletonåœ¨ä½¿ç”¨å‰å·²åˆ›å»º
      */
     public void Startup()
     {

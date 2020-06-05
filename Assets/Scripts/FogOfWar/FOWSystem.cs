@@ -44,6 +44,7 @@ public class FOWSystem : MonoSingleton<FOWSystem>
 	static BetterList<IFOWRevealer> mRemoved = new BetterList<IFOWRevealer>();
 
 	// Color buffers -- prepared on the worker thread.
+	// b（当前视角）、a（当前已探索）、r（上次更新视角）、g（上次已探索）
 	protected Color32[] mBuffer0;
 	protected Color32[] mBuffer1;
 	protected Color32[] mBuffer2;
@@ -284,6 +285,7 @@ public class FOWSystem : MonoSingleton<FOWSystem>
                 mElapsed = 0.001f * (float)sw.ElapsedMilliseconds;
                 mState = State.UpdateTexture;
             }
+            // todo 可以修改间隔时间
             Thread.Sleep(1);
         }
 #if UNITY_EDITOR

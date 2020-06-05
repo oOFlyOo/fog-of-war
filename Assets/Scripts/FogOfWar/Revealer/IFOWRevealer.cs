@@ -14,12 +14,14 @@
 
 public interface IFOWRevealer
 {
-    // 给FOWSystem使用的接口
+    #region 给FOWSystem使用的接口
     bool IsValid();
     Vector3 GetPosition();
     float GetRadius();
+    #endregion 
 
-    // 给FOWLogic使用的接口，维护数据以及其有效性
+    #region 给FOWLogic使用的接口，维护数据以及其有效性
     void Update(int deltaMS);
     void Release();
+    #endregion
 }
