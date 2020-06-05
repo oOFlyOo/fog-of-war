@@ -1,4 +1,6 @@
-﻿Shader "HOG/FOWRender"
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "HOG/FOWRender"
 {
 	Properties
 	{
@@ -34,7 +36,7 @@
 		v2f vert(in appdata_base v)
 		{
 			v2f o;
-			o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+			o.pos = UnityObjectToClipPos(v.vertex);
 			o.uv = v.texcoord;
 			return o;
 		}
