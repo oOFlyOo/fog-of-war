@@ -6,6 +6,7 @@
 using UnityEngine;
 using System.Text;
 using System.Collections.Generic;
+using FowOfWar;
 
 /// <summary>
 /// This script is able to fill in the label's text gradually, giving the effect of someone typing or fading in the content over time.

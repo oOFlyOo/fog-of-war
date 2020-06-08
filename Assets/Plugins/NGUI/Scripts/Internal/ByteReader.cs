@@ -7,6 +7,7 @@ using UnityEngine;
 using System.Text;
 using System.Collections.Generic;
 using System.IO;
+using FowOfWar;
 
 /// <summary>
 /// MemoryStream.ReadLine has an interesting oddity: it doesn't always advance the stream's position by the correct amount:

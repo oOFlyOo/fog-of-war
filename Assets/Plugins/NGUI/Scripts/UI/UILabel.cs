@@ -6,6 +6,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using FowOfWar;
 using Alignment = NGUIText.Alignment;
 
 [ExecuteInEditMode]

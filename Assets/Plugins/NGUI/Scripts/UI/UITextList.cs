@@ -10,6 +10,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Text;
+using FowOfWar;
 
 /// <summary>
 /// Text list can be used with a UILabel to create a scrollable multi-line text field that's

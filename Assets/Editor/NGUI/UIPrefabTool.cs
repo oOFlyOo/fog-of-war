@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Reflection;
+using FowOfWar;
 
 /// <summary>
 /// Tool that makes it easy to drag prefabs into it to "cache" them for ease of use.

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// @by wsh 2017-05-19
 /// </summary>
 
-namespace Battle
+namespace FowOfWar
 {
     public class FOWLogic : Singleton<FOWLogic>
     {

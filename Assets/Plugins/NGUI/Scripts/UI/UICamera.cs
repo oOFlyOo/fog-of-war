@@ -5,7 +5,7 @@
 
 using UnityEngine;
 using System.Collections.Generic;
-
+using FowOfWar;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif

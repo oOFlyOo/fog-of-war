@@ -6,6 +6,7 @@
 using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
+using FowOfWar;
 
 /// <summary>
 /// Draw Call Viewer shows a list of draw calls created by NGUI and lets you hide them selectively.

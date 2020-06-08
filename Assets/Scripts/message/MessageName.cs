@@ -1,8 +1,10 @@
 ﻿using System;
 
-public struct MessageName
+namespace FowOfWar
 {
-    public const string MN_CHARACTOR_BORN = "CharaBorn";
-    public const string MN_CHARACTOR_DIE = "CharaDie";
-} 
-
+    public struct MessageName
+    {
+        public const string MN_CHARACTOR_BORN = "CharaBorn";
+        public const string MN_CHARACTOR_DIE = "CharaDie";
+    }
+}

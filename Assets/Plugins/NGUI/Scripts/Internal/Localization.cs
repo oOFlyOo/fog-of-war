@@ -5,6 +5,7 @@
 
 using UnityEngine;
 using System.Collections.Generic;
+using FowOfWar;
 
 /// <summary>
 /// Localization manager is able to parse localization information from text assets.

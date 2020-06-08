@@ -6,6 +6,7 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using FowOfWar;
 
 /// <summary>
 /// Atlas maker lets you create atlases from a bunch of small textures. It's an alternative to using the external Texture Packer.

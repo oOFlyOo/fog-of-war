@@ -7,6 +7,7 @@
 
 using UnityEngine;
 using System.Collections.Generic;
+using FowOfWar;
 
 /// <summary>
 /// This is an internally-created script used by the UI system. You shouldn't be attaching it manually.

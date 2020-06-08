@@ -3,6 +3,7 @@
 // Copyright © 2011-2016 Tasharen Entertainment
 //----------------------------------------------
 
+using FowOfWar;
 using UnityEngine;
 
 /// <summary>

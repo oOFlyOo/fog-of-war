@@ -6,6 +6,7 @@
 using UnityEngine;
 using AnimationOrTween;
 using System.Collections.Generic;
+using FowOfWar;
 
 /// <summary>
 /// Simple toggle functionality.

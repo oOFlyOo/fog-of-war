@@ -6,6 +6,7 @@
 using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
+using FowOfWar;
 
 /// <summary>
 /// Editor component used to display a list of sprites.

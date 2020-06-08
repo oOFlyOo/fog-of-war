@@ -6,6 +6,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using FowOfWar;
 
 /// <summary>
 /// UI Atlas contains a collection of sprites inside one large texture atlas.

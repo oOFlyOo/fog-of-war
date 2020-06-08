@@ -11,6 +11,7 @@ using UnityEngine;
 using System.Text;
 using System.Diagnostics;
 using System.Collections.Generic;
+using FowOfWar;
 
 /// <summary>
 /// Helper class containing functionality related to using dynamic fonts.
