@@ -32,7 +32,7 @@ public class FOWSystem : MonoSingleton<FOWSystem>
     
 	protected Transform mTrans;
 	protected Vector3 mOrigin = Vector3.zero;
-	protected Vector3 mSize = Vector3.one;
+	public Vector3 WorldCenter { get; private set; }
 
 	// Revealers that the thread is currently working with
 	static BetterList<IFOWRevealer> mRevealers = new BetterList<IFOWRevealer>();
@@ -61,18 +61,22 @@ public class FOWSystem : MonoSingleton<FOWSystem>
     volatile bool mThreadWork;
 
     protected int mTextureSizeSqr;
+    
+    public const int DEFAULT_WORLD_SIZE = 512;
 
 	/// <summary>
 	/// Size of your world in units. For example, if you have a 256x256 terrain, then just leave this at '256'.
 	/// </summary>
     /// 
-	public float worldSize = 512f;
+	public int WorldSize = 512;
 
+	public const int DEFAULT_TEXTURE_SIZE = 512;
+	
 	/// <summary>
 	/// Size of the fog of war texture. Higher resolution will result in more precise fog of war, at the cost of performance.
 	/// </summary>
 
-	public int textureSize = 512;
+	public int TextureSize = 512;
 
 	/// <summary>
 	/// How frequently the visibility checks get performed.
@@ -105,6 +109,8 @@ public class FOWSystem : MonoSingleton<FOWSystem>
 
     public bool enableSystem = true;
 
+    private bool _internalEnable = false;
+
     /// <summary>
     /// If disable it, the whole rendering do not work
     /// </summary>
@@ -128,6 +134,10 @@ public class FOWSystem : MonoSingleton<FOWSystem>
 	/// </summary>
 
 	public Texture2D texture { get { return mTexture; } }
+	
+	public Color UnexploredColor = new Color(0f, 0f, 0f, 250f / 255f);
+
+	public Color ExploredColor = new Color(0f, 0f, 0f, 200f / 255f);
     
 	/// <summary>
 	/// Factor used to blend between the texture.
@@ -177,27 +187,7 @@ public class FOWSystem : MonoSingleton<FOWSystem>
     protected override void Init()
 	{
 		mTrans = transform;
-        
-        // TODO：实际项目中，自己根据场景地图设置位置信息
-        // 这里为了简单，战争迷雾Transform直接居中，原点位置为左下角
-        mTrans.localPosition = new Vector3(0f, 0f, 0f);
-		mOrigin = mTrans.position;
-        mOrigin.x -= worldSize * 0.5f;
-        mOrigin.z -= worldSize * 0.5f;
-
-        mTextureSizeSqr = textureSize * textureSize;
-		mBuffer0 = new Color32[mTextureSizeSqr];
-		mBuffer1 = new Color32[mTextureSizeSqr];
-		mBuffer2 = new Color32[mTextureSizeSqr];
-        mRevealers.Clear();
-        mRemoved.Clear();
-        mAdded.Clear();
-        
-        // Add a thread update function -- all visibility checks will be done on a separate thread
-        mThread = new Thread(ThreadUpdate);
-        mThreadWork = true;
-        mThread.Start();
-    }
+	}
 
     /// <summary>
     /// Ensure that the thread gets terminated.
@@ -205,12 +195,7 @@ public class FOWSystem : MonoSingleton<FOWSystem>
 
     public override void Dispose()
     {
-        if (mThread != null)
-        {
-            mThreadWork = false;
-            mThread.Join();
-            mThread = null;
-        }
+        ReleaseThread();
 
         mBuffer0 = null;
         mBuffer1 = null;
@@ -223,13 +208,85 @@ public class FOWSystem : MonoSingleton<FOWSystem>
         }
     }
 
+    private void ReleaseThread()
+    {
+	    if (mThread != null)
+	    {
+		    mThreadWork = false;
+		    mThread.Join();
+		    mThread = null;
+	    }
+	    
+	    mRevealers.Clear();
+	    mRemoved.Clear();
+	    mAdded.Clear();
+    }
+
+
+    public void UpdateData(Vector3 worldCenter)
+    {
+	    UpdateData(worldCenter, DEFAULT_WORLD_SIZE, DEFAULT_TEXTURE_SIZE);
+    }
+
+    public void UpdateData(Vector3 worldCenter, int worldSize, int textureSize)
+    {
+	    WorldCenter = worldCenter;
+	    mOrigin = worldCenter;
+	    mOrigin.x -= worldSize * 0.5f;
+	    mOrigin.z -= worldSize * 0.5f;
+
+	    WorldSize = worldSize;
+	    TextureSize = textureSize;
+	    mTextureSizeSqr = TextureSize * TextureSize;
+    }
+
+    public void Begin()
+    {
+	    // Add a thread update function -- all visibility checks will be done on a separate thread
+	    if (mThread == null)
+	    {
+		    mThread = new Thread(ThreadUpdate);
+		    mThreadWork = true;
+		    mThread.Start();
+	    }
+
+	    if (mBuffer0 != null && mBuffer0.Length == mTextureSizeSqr)
+	    {
+		    for (int i = 0; i < mTextureSizeSqr; i++)
+		    {
+			    mBuffer0[i] = new Color32(0, 0, 0, 0);
+			    mBuffer1[i] = new Color32(0, 0, 0, 0);
+			    mBuffer2[i] = new Color32(0, 0, 0, 0);
+		    }
+	    }
+	    else
+	    {
+		    mBuffer0 = new Color32[mTextureSizeSqr];
+		    mBuffer1 = new Color32[mTextureSizeSqr];
+		    mBuffer2 = new Color32[mTextureSizeSqr];
+	    }
+
+	    _internalEnable = true;
+    }
+
+
+    public void Cancel()
+    {
+	    _internalEnable = false;
+
+	    mState = State.Blending;
+
+	    ReleaseThread();
+    }
+    
+
 	/// <summary>
 	/// Is it time to update the visibility? If so, flip the switch.
 	/// </summary>
 
 	void Update ()
 	{
-        if (!enableSystem)
+        if (!enableSystem || !_internalEnable)
         {
             return;
         }
@@ -301,7 +358,7 @@ public class FOWSystem : MonoSingleton<FOWSystem>
 	{
 		Gizmos.matrix = transform.localToWorldMatrix;
 		Gizmos.color = Color.yellow;
-		Gizmos.DrawWireCube(new Vector3(0f, 0f, 0f), new Vector3(worldSize, 0f, worldSize));
+		Gizmos.DrawWireCube(new Vector3(0f, 0f, 0f), new Vector3(WorldSize, 0f, WorldSize));
 	}
     
 	/// <summary>
@@ -350,7 +407,7 @@ public class FOWSystem : MonoSingleton<FOWSystem>
 		}
 
 		// For conversion from world coordinates to texture coordinates
-		float worldToTex = (float)textureSize / worldSize;
+		float worldToTex = (float)TextureSize / WorldSize;
 
 		// Update the visibility buffer, one revealer at a time
 		for (int i = 0; i < mRevealers.size; ++i)
@@ -391,20 +448,20 @@ public class FOWSystem : MonoSingleton<FOWSystem>
 		int cx = Mathf.RoundToInt(pos.x);
 		int cy = Mathf.RoundToInt(pos.z);
 
-		cx = Mathf.Clamp(cx, 0, textureSize - 1);
-		cy = Mathf.Clamp(cy, 0, textureSize - 1);
+		cx = Mathf.Clamp(cx, 0, TextureSize - 1);
+		cy = Mathf.Clamp(cy, 0, TextureSize - 1);
 
 		int radiusSqr = Mathf.RoundToInt(radius * radius);
 
 		for (int y = ymin; y < ymax; ++y)
 		{
-			if (y > -1 && y < textureSize)
+			if (y > -1 && y < TextureSize)
 			{
-				int yw = y * textureSize;
+				int yw = y * TextureSize;
 
 				for (int x = xmin; x < xmax; ++x)
 				{
-					if (x > -1 && x < textureSize)
+					if (x > -1 && x < TextureSize)
 					{
 						int xd = x - cx;
 						int yd = y - cy;
@@ -426,23 +483,23 @@ public class FOWSystem : MonoSingleton<FOWSystem>
     {
         Color32 c;
 
-        for (int y = 0; y < textureSize; ++y)
+        for (int y = 0; y < TextureSize; ++y)
         {
-            int yw = y * textureSize;
+            int yw = y * TextureSize;
             int yw0 = (y - 1);
             if (yw0 < 0) yw0 = 0;
             int yw1 = (y + 1);
-            if (yw1 == textureSize) yw1 = y;
+            if (yw1 == TextureSize) yw1 = y;
 
-            yw0 *= textureSize;
-            yw1 *= textureSize;
+            yw0 *= TextureSize;
+            yw1 *= TextureSize;
 
-            for (int x = 0; x < textureSize; ++x)
+            for (int x = 0; x < TextureSize; ++x)
             {
                 int x0 = (x - 1);
                 if (x0 < 0) x0 = 0;
                 int x1 = (x + 1);
-                if (x1 == textureSize) x1 = x;
+                if (x1 == TextureSize) x1 = x;
 
                 int index = x + yw;
                 int val = mBuffer1[index].r;
@@ -507,7 +564,7 @@ public class FOWSystem : MonoSingleton<FOWSystem>
 		if (mTexture == null)
         {
             // Native ARGB format is the fastest as it involves no data conversion
-            mTexture = new Texture2D(textureSize, textureSize, TextureFormat.ARGB32, false, true);
+            mTexture = new Texture2D(TextureSize, TextureSize, TextureFormat.ARGB32, false, true);
 
 			mTexture.wrapMode = TextureWrapMode.Clamp;
 
@@ -555,13 +612,13 @@ public class FOWSystem : MonoSingleton<FOWSystem>
         }
 
         pos -= mOrigin;
-        float worldToTex = (float)textureSize / worldSize;
+        float worldToTex = (float)TextureSize / WorldSize;
         int cx = Mathf.RoundToInt(pos.x * worldToTex);
         int cy = Mathf.RoundToInt(pos.z * worldToTex);
 
-        cx = Mathf.Clamp(cx, 0, textureSize - 1);
-        cy = Mathf.Clamp(cy, 0, textureSize - 1);
-        int index = cx + cy * textureSize;
+        cx = Mathf.Clamp(cx, 0, TextureSize - 1);
+        cy = Mathf.Clamp(cy, 0, TextureSize - 1);
+        int index = cx + cy * TextureSize;
         return mBuffer0[index].r > 64 || mBuffer1[index].r > 0;
     }
 
@@ -577,12 +634,12 @@ public class FOWSystem : MonoSingleton<FOWSystem>
         }
         pos -= mOrigin;
 
-        float worldToTex = (float)textureSize / worldSize;
+        float worldToTex = (float)TextureSize / WorldSize;
         int cx = Mathf.RoundToInt(pos.x * worldToTex);
         int cy = Mathf.RoundToInt(pos.z * worldToTex);
 
-        cx = Mathf.Clamp(cx, 0, textureSize - 1);
-        cy = Mathf.Clamp(cy, 0, textureSize - 1);
-        return mBuffer0[cx + cy * textureSize].g > 0;
+        cx = Mathf.Clamp(cx, 0, TextureSize - 1);
+        cy = Mathf.Clamp(cy, 0, TextureSize - 1);
+        return mBuffer0[cx + cy * TextureSize].g > 0;
     }
 }

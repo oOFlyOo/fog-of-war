@@ -25,6 +25,8 @@ namespace Battle
             m_revealers.Clear();
             m_renders.Clear();
             FOWSystem.instance.Startup();
+            FOWSystem.instance.UpdateData(Vector3.zero);
+            FOWSystem.instance.Begin();
 
             Transform Trans = GameObject.Find("FOWRenderRoot").transform;
             m_mapFOWRender = new MapFOWRender(Trans);

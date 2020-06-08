@@ -18,7 +18,7 @@ public class MapFOWRender
             // 这里为了简单，直接居中
             float fCenterX = 0f;
             float fCenterZ = 0f;
-            float scale = FOWSystem.instance.worldSize / 128f * 2.56f;
+            float scale = FOWSystem.instance.WorldSize / 128f * 2.56f;
 
             render.transform.position = new Vector3(fCenterX, 0f, -fCenterZ);
             render.transform.eulerAngles = new Vector3(-90f, 180f, 0f);

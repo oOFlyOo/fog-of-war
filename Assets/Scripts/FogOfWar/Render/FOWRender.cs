@@ -9,12 +9,6 @@ using UnityEngine;
 
 public class FOWRender : MonoBehaviour
 {
-    // 这里设置战争迷雾颜色
-
-    public Color unexploredColor = new Color(0f, 0f, 0f, 250f / 255f);
-
-    public Color exploredColor = new Color(0f, 0f, 0f, 200f / 255f);
-
     Material mMat;
 
     public bool IsActive
@@ -57,15 +51,7 @@ public class FOWRender : MonoBehaviour
             return;
         }
 
-        if (FOWSystem.instance.enableFog)
-        {
-            mMat.SetColor(UnExploredID, unexploredColor);
-        }
-        else
-        {
-            mMat.SetColor(UnExploredID, exploredColor);
-        }
-        mMat.SetColor(ExploredHashID, exploredColor);
+        UpdateColor();
 
         StartCoroutine(WaitSetTexture());
     }
@@ -84,6 +70,19 @@ public class FOWRender : MonoBehaviour
         mMat.SetTexture(MainTexID, FOWSystem.instance.texture);
     }
 
+    private void UpdateColor()
+    {
+        if (FOWSystem.instance.enableFog)
+        {
+            mMat.SetColor(UnExploredID, FOWSystem.instance.UnexploredColor);
+        }
+        else
+        {
+            mMat.SetColor(UnExploredID, FOWSystem.instance.ExploredColor);
+        }
+        mMat.SetColor(ExploredHashID, FOWSystem.instance.ExploredColor);
+    }
+
     void OnWillRenderObject()
     {
         if (mMat != null && FOWSystem.instance.texture != null)
@@ -91,14 +90,7 @@ public class FOWRender : MonoBehaviour
             mMat.SetFloat(BlendFactorID, FOWSystem.instance.blendFactor);
             
             #if UNITY_EDITOR
-            if (FOWSystem.instance.enableFog)
-            {
-                mMat.SetColor(UnExploredID, unexploredColor);
-            }
-            else
-            {
-                mMat.SetColor(UnExploredID, exploredColor);
-            }
+            UpdateColor();
             #endif
         }
     }
